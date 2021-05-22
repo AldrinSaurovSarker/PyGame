@@ -136,12 +136,12 @@ def GameLoop():
                 fh.close()
                 break
 
+        # Snake length changes
         snake_list.append((x, y))
-
         if len(snake_list) > snake_length:
             del snake_list[0]
 
-        # Generate Food
+        # Food Eaten and new food generate
         if (fx, fy) in snake_list:
             score += difficulty
             snake_length += 1
@@ -169,12 +169,12 @@ def GameLoop():
             fh = open('high_score.txt', mode='w')
             fh.write(str(high_score))
             fh.close()
-
             continue
 
         # Draw Snake
         for s in snake_list:
-            pygame.draw.rect(win, black, (s[0], s[1], snake_block, snake_block))
+            clr = blue if (s[0], s[1]) == (x, y) else black # Blue Snake Head
+            pygame.draw.rect(win, clr, (s[0], s[1], snake_block, snake_block))
 
         # Draw Game Border
         pygame.draw.line(win, black, (0, upper_border_height), (display_width, upper_border_height))
