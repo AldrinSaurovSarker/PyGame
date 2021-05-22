@@ -1,7 +1,6 @@
 # Needs to work on
-# 1. High Score Management
-# 2. Maze/Game Area of different shape
-# 3. Special Food disappearance
+# 1. Maze/Game Area of different shape
+# 2. Special Food disappearance
 
 import pygame
 import random
@@ -24,6 +23,16 @@ pygame.display.set_caption('Anaconda')
 win.fill(white)
 pygame.display.update()
 
+# High Score
+try:
+    f = open('high_score.txt', mode='r')
+    high_score = int(f.read())
+except FileNotFoundError:
+    f = open('high_score.txt', mode='w')
+    high_score = 0
+    f.write(str(high_score))
+f.close()
+
 
 # Display message on the screen
 def message(msg, color=black, font_style=None, font_size=30, position=(10, 10)):
@@ -33,32 +42,33 @@ def message(msg, color=black, font_style=None, font_size=30, position=(10, 10)):
 
 
 def GameLoop():
+    global high_score
     upper_border_height = 30
     run = True
     game_over = False
     score = 0
     eaten = 0
     difficulty = 1
-    
+
     # Snake
     snake_speed = difficulty * 3
     snake_block = 10
     snake_length = 1
     run_direction = None
     snake_list = []
-    
+
     # Snake head and direction
     x, y = int(display_width / 2), int(display_height / 2)
     xm, ym = 0, 0
-    
+
     # Special Food
     sfx, sfy = -100, -100
     spc = False
-    
+
     # Food Coordinate
     fx = round(random.randrange(0, display_width, 10) / 10) * 10
     fy = round(random.randrange(0, display_height, 10) / 10) * 10
-    
+
     clock = pygame.time.Clock()
 
     while run:
@@ -112,7 +122,7 @@ def GameLoop():
                     ym = 0
 
         win.fill(white)
-        
+
         # Continuous running in a direction
         x += xm
         y += ym
@@ -121,6 +131,9 @@ def GameLoop():
         for s in snake_list[:-1]:
             if s == (x, y):
                 game_over = True
+                fh = open('high_score.txt', mode='w')
+                fh.write(str(high_score))
+                fh.close()
                 break
 
         snake_list.append((x, y))
@@ -153,6 +166,10 @@ def GameLoop():
         # Snake Touches Border
         if x < 0 or y < upper_border_height or x >= display_width or y >= display_height:
             game_over = True
+            fh = open('high_score.txt', mode='w')
+            fh.write(str(high_score))
+            fh.close()
+
             continue
 
         # Draw Snake
@@ -162,16 +179,22 @@ def GameLoop():
         # Draw Game Border
         pygame.draw.line(win, black, (0, upper_border_height), (display_width, upper_border_height))
         pygame.draw.line(win, black, (0, upper_border_height), (0, display_height))
-        pygame.draw.line(win, black, (0, display_height-1), (display_width, display_height-1))
-        pygame.draw.line(win, black, (display_width-1, display_height-1), (display_width-1, upper_border_height))
-        
+        pygame.draw.line(win, black, (0, display_height - 1), (display_width, display_height - 1))
+        pygame.draw.line(win, black, (display_width - 1, display_height - 1), (display_width - 1, upper_border_height))
+
         # Draw Normal and Special Food
         pygame.draw.rect(win, orange, (sfx, sfy, snake_block * 3, snake_block * 3))
         pygame.draw.rect(win, green, (fx, fy, snake_block, snake_block))
 
+        # Update High Score
+        if score > high_score:
+            high_score = score
+
         # Display Top
-        message('Score : ' + str(score) + "             Difficulty : " + str(difficulty) +
-                "             U --> Upper Difficulty" + "             L --> Lower Difficulty", cyan, font_size=20)
+        message('Score : ' + str(score) + "       High Score : " + str(high_score), color=cyan, font_size=20)
+        message("Difficulty : " + str(difficulty) + "       [U] Upper Difficulty" + "       [L] Lower Difficulty",
+                cyan, font_size=20, position=(display_width/2.6, 10))
+
         pygame.display.update()
         clock.tick(snake_speed)
 
